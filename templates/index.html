@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calibration Tool</title>
+    <style>
+        th, td { font-size: 12px; }
+        body { font-family: Arial, sans-serif; text-align: center; font-size: 12px; }
+        .container { width: 50%; margin: auto; display: flex; flex-direction: column; align-items: center; }
+        img { max-width: 100%; margin-top: 20px; }
+        .plot-section, .sample-section { width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h2>Upload Excel File</h2>
+    <p><a href="https://purdue0-my.sharepoint.com/:x:/g/personal/ngou_purdue_edu/EYSSuYD8nGtIkkVBVew4MaEBl3Q63SngfccK_iuQU9Ugmw?download=1" target="_blank">📥 Download Template File</a></p>
+    <form id="uploadForm">
+        <input type="file" id="excelFile" accept=".xlsx">
+        <button type="submit">Upload</button>
+    </form>
+    <p id="uploadStatus"></p>
+
+    <div class="container">
+        <div class="plot-section">
+            <h2>Calibration Curve</h2>
+            <img id="calibrationPlot" src="" alt="Calibration Plot will appear here" style="display:none;">
+        </div>
+        <div class="sample-section">
+            <h3>Sample Data</h3>
+            <table id="sampleTable" border="1" style="white-space: nowrap; overflow-x: auto; display: none; margin: auto;">
+                <tr>
+                    <th>Sample Name</th>
+                    <th>Sample Intensity</th>
+                    <th>Normalized Intensity</th>
+                    <th>Concentration (ppb)</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <h3>Regression Results</h3>
+    <p id="regressionResults"></p>
+
+    <script src="static/script.js"></script>
+</body>
+</html>
