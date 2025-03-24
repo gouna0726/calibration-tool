@@ -1,47 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calibration Tool</title>
-    <style>
-        th, td { font-size: 12px; }
-        body { font-family: Arial, sans-serif; text-align: center; font-size: 12px; }
-        .container { width: 50%; margin: auto; display: flex; flex-direction: column; align-items: center; }
-        img { max-width: 100%; margin-top: 20px; }
-        .plot-section, .sample-section { width: 100%; margin-top: 20px; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Calibration Tool</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px 12px; text-align: center; }
+    th { background-color: #f2f2f2; }
+    .section { margin-bottom: 30px; }
+    .plot-container { margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h2>Upload Excel File</h2>
-    <p><a href="/download_template" download>📥 Download Template File</a></p>
-    <form id="uploadForm">
-        <input type="file" id="excelFile" accept=".xlsx">
-        <button type="submit">Upload</button>
-    </form>
-    <p id="uploadStatus"></p>
+  <h1>Calibration Tool</h1>
 
-    <div class="container">
-        <div class="plot-section">
-            <h2>Calibration Curve</h2>
-            <img id="calibrationPlot" src="" alt="Calibration Plot will appear here" style="display:none;">
-        </div>
-        <div class="sample-section">
-            <h3>Sample Data</h3>
-            <table id="sampleTable" border="1" style="white-space: nowrap; overflow-x: auto; display: none; margin: auto;">
-                <tr>
-                    <th>Sample Name</th>
-                    <th>Sample Intensity</th>
-                    <th>Normalized Intensity</th>
-                    <th>Concentration (ppb)</th>
-                </tr>
-            </table>
-        </div>
+  <div class="section">
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label for="file">Upload Excel File:</label>
+      <input type="file" name="file" id="file" accept=".xlsx" required>
+      <button type="submit">Upload</button>
+    </form>
+    <p><a href="/download_template" download>📥 Download Template File</a></p>
+  </div>
+
+  <div id="results" class="section" style="display:none">
+    <h2>Results</h2>
+    <p><strong>Slope:</strong> <span id="slope"></span></p>
+    <p><strong>Intercept:</strong> <span id="intercept"></span></p>
+    <p><strong>R²:</strong> <span id="r_squared"></span></p>
+    <p><strong>Detection Limit:</strong> <span id="detection_limit"></span></p>
+
+    <div class="plot-container">
+      <h3>Calibration Plot</h3>
+      <object type="image/svg+xml" id="plot" width="600" height="400"></object>
     </div>
 
-    <h3>Regression Results</h3>
-    <p id="regressionResults"></p>
+    <h3>Sample Results</h3>
+    <table id="sampleTable">
+      <thead>
+        <tr>
+          <th>Sample Name</th>
+          <th>Sample Intensity</th>
+          <th>Sample Internal Control</th>
+          <th>Sample Concentration (ppb)</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
 
-    <script src="static/script.js"></script>
+  <script>
+    document.getElementById('uploadForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const formData = new FormData();
+      const fileInput = document.getElementById('file');
+      formData.append('file', fileInput.files[0]);
+
+      fetch('/upload', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('results').style.display = 'block';
+          document.getElementById('slope').textContent = data.slope;
+          document.getElementById('intercept').textContent = data.intercept;
+          document.getElementById('r_squared').textContent = data.r_squared;
+          document.getElementById('detection_limit').textContent = data.detection_limit;
+          document.getElementById('plot').setAttribute('data', data.plot_url);
+
+          const tbody = document.getElementById('sampleTable').querySelector('tbody');
+          tbody.innerHTML = '';
+          data.sample_data.forEach(sample => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+              <td>${sample['Sample Name']}</td>
+              <td>${sample['Sample Intensity'].toFixed(2)}</td>
+              <td>${sample['Sample Internal Control'].toFixed(2)}</td>
+              <td>${sample['Sample Concentration (ppb)'].toFixed(4)}</td>
+            `;
+            tbody.appendChild(row);
+          });
+        })
+        .catch(error => {
+          alert('Error uploading file.');
+          console.error(error);
+        });
+    });
+  </script>
 </body>
 </html>
