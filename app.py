@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import io
 import base64
 from sklearn.linear_model import LinearRegression
+from flask import send_file
+
 
 app = Flask(__name__, template_folder='templates', static_folder='static')
 
@@ -20,6 +22,10 @@ def get_blank_control(sample_data):
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/download_template')
+def download_template():
+    return send_file("template_upload.xlsx", as_attachment=True)
 
 @app.route('/upload_excel', methods=['POST'])
 def upload_excel():
